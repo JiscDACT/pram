@@ -39,11 +39,15 @@ class Pram:
         :return:
         """
         tm = Pram.__get_transition_matrix__(values)
+
         # Apply minimum value to diagonal using m
         diag = np.diag(tm)
         diag = [m if a_ < m else a_ for a_ in diag]
         diag = pd.Series(diag, index=tm.columns)
         np.fill_diagonal(tm.values, diag)
+
+        # normalise so cols add up to 1
+        tm = tm.div(tm.sum(axis=0), axis=1)
 
         # identity matrix of diagonal
         ei = tm.copy()
