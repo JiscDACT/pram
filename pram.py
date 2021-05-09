@@ -118,8 +118,19 @@ class Pram:
         print(freq)
 
 
-if __name__ == "__main__":
+def pram(data, m=0.8, alpha=0.5, columns=None):
+    """
+    Uses PRAM to add perturbation to the supplied dataset
+    :param data: a dataframe
+    :param m: minimum diagonal value (defaults to 0.8)
+    :param alpha: the degree of change, from 0 (no changes) to 1 (max changes). Defaults to 0.5
+    :param columns: a list of the names of the columns to apply PRAM to. Defaults to None, applying to all columns.
+    :return: a dataset modified using the PRAM algorithm
+    """
+    return Pram.pram(data,m=m, alpha=alpha, columns=columns)
 
+
+def main():
     argparser = argparse.ArgumentParser(description='Post-randomisation method (PRAM) for Python.')
     argparser.add_argument('input_path', metavar='<input>', type=str, nargs=1, default='input.csv',
                            help='The name of the CSV data file to process')
@@ -153,7 +164,7 @@ if __name__ == "__main__":
     input_data = pd.read_csv(input_path)
 
     # Apply the perturbation
-    output_data = Pram.pram(input_data, m=param_minimum, alpha=param_alpha)
+    output_data = pram(input_data, m=param_minimum, alpha=param_alpha)
 
     # Print frequency table
     if print_frequencies:
@@ -161,3 +172,7 @@ if __name__ == "__main__":
 
     # Write the output
     output_data.to_csv(output_path, encoding='UTF-8', index=False)
+
+
+if __name__ == "__main__":
+    main()
