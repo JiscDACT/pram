@@ -25,6 +25,13 @@ From the command line you can also use the -f switch to print a
 table of the frequencies of categories in the original and changed
 versions of the dataset.
 
+Example: 
+
+`pram mydata.csv output.csv 0.8 0.5 -f`
+
+This will load the data in mydata.csv, run PRAM with m=0.8 and a=0.5, save
+the output in output.csv, and print a frequency table to the console.
+
 ## Example
 
 ~~~
