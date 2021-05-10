@@ -37,8 +37,28 @@ Example:
 This will load the data in mydata.csv, run PRAM with m=0.8 and a=0.5, save
 the output in output.csv, and print a frequency table to the console.
 
-## Example
+## Examples
 
+### Command-line use with stratification
+
+Run PRAM stratified by gender on region and education, and output the frequency table
+~~~
+pram mydata.csv output.csv 0.8 0.5 region,education gender -f
+~~~
+Result:
+
+~~~
+           Column  Original  Output
+female     gender      0.67    0.67
+male       gender      0.33    0.33
+rural      region      0.67    0.71
+urban      region      0.33    0.29
+lower   education      0.67    0.62
+higher  education      0.33    0.38
+~~~
+Note that as gender was used to stratify the data, it didn't change.
+
+### Simple use within python
 ~~~
 from pram import pram
 persons = [
@@ -69,4 +89,33 @@ persons = [
 ]
 df = pd.DataFrame(persons)
 print(pram(df))
+~~~
+The output of the example might be:
+
+~~~
+    gender region education age
+0   female  rural     lower  27
+1   female  urban     lower  35
+2     male  rural    higher  26
+3     male  rural     lower  40
+4   female  rural    higher  41
+5   female  urban     lower  54
+6     male  rural    higher  38
+7   female  rural     lower  44
+8     male  urban     lower  18
+9     male  urban     lower  27
+10  female  urban     lower  44
+11  female  urban     lower  33
+12  female  urban     lower  27
+13    male  rural     lower  31
+14  female  urban    higher  40
+15    male  urban    higher  23
+16  female  rural    higher  68
+17  female  urban     lower  19
+18  female  urban     lower  48
+19  female  rural     lower  24
+20    male  rural     lower  38
+21    male  rural     lower  38
+22    male  urban     lower  30
+23  female  rural     lower  41
 ~~~
