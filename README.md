@@ -5,8 +5,7 @@ Python implementation of post-randomisation method for disclosure control
 [![License](https://img.shields.io/pypi/l/pram.svg?branch=main)](https://github.com/scottbw/pram/blob/main/LICENSE)
 [![Status](https://img.shields.io/pypi/status/pram.svg?branch=main)](https://pypi.org/project/pram/)
 [![Supported versions](https://img.shields.io/pypi/pyversions/pram.svg?branch=main)](https://pypi.org/project/pram/)
-
-## Usage
+[![Version](https://img.shields.io/pypi/v/pram.svg?branch=main)](https://pypi.org/project/pram/)
 
 Call the pram() method with a Pandas dataframe to apply post-randomisation perturbation
 to the dataset using a generated transition matrix.
