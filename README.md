@@ -22,6 +22,10 @@ The behaviour is largely the same as that in the "sdcMicro" R package.
 You can also call Pram from the command line, supplying a CSV file
 input and path to output the perturbed dataset as CSV.
 
+From the command line you can also use the -f switch to print a 
+table of the frequencies of categories in the original and changed
+versions of the dataset.
+
 ## Example
 
 ~~~
