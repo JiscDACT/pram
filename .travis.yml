@@ -27,7 +27,6 @@ deploy:
   provider: pypi
   user: $TEST_PYPI_USER
   password: $TEST_PYPI_PASS
-  server: https://python.pypi.org/
   distributions: "sdist bdist_wheel"
   on:
     branch: main
