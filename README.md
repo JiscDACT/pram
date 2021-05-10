@@ -14,6 +14,11 @@ You can specify the minimum diagonal value (i.e. the minimum probability
 that a data point remains unchanged) and an alpha value to modify the
 likelihood of perturbation (from zero to one). 
 
+By default all columns are modified, and there is no stratification. However
+you can specify the columns to process as a list, and also specify
+a column to use for stratification. If stratification is used, the
+column used for stratification is not modified.
+
 The behaviour is largely the same as that in the "sdcMicro" R package.
 
 ## Command-line usage

@@ -6,6 +6,7 @@ import os
 from collections import Counter
 import logging
 
+
 class Pram:
 
     @staticmethod
@@ -75,7 +76,7 @@ class Pram:
         return np.random.choice(column.index, p=column.values)
 
     @staticmethod
-    def pram(data, m=0.8, alpha=0.5, columns=None):
+    def pram(data, m=0.8, alpha=0.5, columns=None, strata=None):
         """
         Uses PRAM to add perturbation to the supplied dataset
         :param data: a dataframe
@@ -89,19 +90,39 @@ class Pram:
         # work with factors/tokens using PRAM
         data = data.applymap(str)
 
+        if columns is None:
+            columns = data.columns
+
+        if strata and strata in columns:
+            logging.warning("Columns used for stratification cannot also be modified; " + strata +
+                            " will be removed from the set of columns")
+            columns = columns[columns != strata]
+
         # Create the weighted transition matrix for each column
         tm = {}
 
-        if not columns:
-            columns = data.columns
+        if strata is not None:
+            strata_levels = list(set(data[strata].values))
+            strata_levels.append('all')
+        else:
+            strata_levels = ['all']
 
-        for column in columns:
-            tm[column] = Pram.__get_weighted_transition_matrix__(data[column].values, m, alpha)
+        for level in strata_levels:
+            for column in columns:
+                if level == 'all':
+                    values = data[column].values
+                else:
+                    values = data[data[strata] == level][column].values
+                tm[level, column] = Pram.__get_weighted_transition_matrix__(values, m, alpha)
 
         # For each row apply PRAM
         for index, row in data.iterrows():
-            for column in data.columns:
-                row[column] = Pram.__pram_replace__(tm[column], row[column])
+            for column in columns:
+                if strata != column:
+                    strata_value = row[strata]
+                else:
+                    strata_value = 'all'
+                row[column] = Pram.__pram_replace__(tm[strata_value, column], row[column])
 
         return data
 
@@ -131,7 +152,7 @@ class Pram:
         print(freq)
 
 
-def pram(data, m=0.8, alpha=0.5, columns=None):
+def pram(data, m=0.8, alpha=0.5, columns=None, strata=None):
     """
     Uses PRAM to add perturbation to the supplied dataset
     :param data: a dataframe
@@ -140,7 +161,7 @@ def pram(data, m=0.8, alpha=0.5, columns=None):
     :param columns: a list of the names of the columns to apply PRAM to. Defaults to None, applying to all columns.
     :return: a dataset modified using the PRAM algorithm
     """
-    return Pram.pram(data,m=m, alpha=alpha, columns=columns)
+    return Pram.pram(data, m=m, alpha=alpha, columns=columns, strata=strata)
 
 
 def main():
@@ -153,6 +174,10 @@ def main():
                            help='The minimum diagonal value')
     argparser.add_argument('a', metavar='<a>', type=float, nargs='?', default=0.5,
                            help='The alpha value')
+    argparser.add_argument('strata', metavar='<strata>', type=str, nargs='?', default=None,
+                           help='The column to stratify by')
+    argparser.add_argument('columns', metavar='<columns>', type=str, nargs='?', default=None,
+                           help='The column to stratify by')
     argparser.add_argument('-f', action='store_true',
                            help='Print a frequency table showing original vs changed frequencies.')
 
@@ -161,9 +186,14 @@ def main():
     # Defaults
     input_path = vars(args)['input_path'][0]
     output_path = vars(args)['output_path']
+    columns = vars(args)['columns']
+    strata = vars(args)['strata']
     param_minimum = vars(args)['m']
     param_alpha = vars(args)['a']
     print_frequencies = vars(args)['f']
+
+    if isinstance(columns, str):
+        columns = [columns]
 
     if not os.path.exists(input_path):
         logging.error('Input data file does not exist')
@@ -177,7 +207,7 @@ def main():
     input_data = pd.read_csv(input_path)
 
     # Apply the perturbation
-    output_data = pram(input_data, m=param_minimum, alpha=param_alpha)
+    output_data = pram(input_data, m=param_minimum, alpha=param_alpha, columns=columns, strata=strata)
 
     # Print frequency table
     if print_frequencies:
