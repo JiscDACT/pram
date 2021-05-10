@@ -4,7 +4,7 @@ import numpy as np
 import argparse
 import os
 from collections import Counter
-
+import logging
 
 class Pram:
 
@@ -107,6 +107,15 @@ class Pram:
 
     @staticmethod
     def __print_frequencies__(input_df, output_df):
+        """
+        Prints a table of the frequencies of values for the input and the output,
+        enabling the user to determine whether the PRAM algorithm has substantially
+        altered the 'shape' of the data and needs to modify the threshold and/or
+        alpha.
+        :param input_df: the original dataframe
+        :param output_df: the modified dataframe
+        :return: None. Outputs the table to STDOUT
+        """
         input_df = input_df.applymap(str)
         freq = None
         for column in input_df.columns:
@@ -157,12 +166,12 @@ def main():
     print_frequencies = vars(args)['f']
 
     if not os.path.exists(input_path):
-        print('Input data file does not exist')
+        logging.error('Input data file does not exist')
         exit()
     else:
-        print("Input data file: " + input_path)
+        logging.info("Input data file: " + input_path)
 
-    print("Output file: " + output_path)
+    logging.info("Output file: " + output_path)
 
     # Load the dataset
     input_data = pd.read_csv(input_path)
