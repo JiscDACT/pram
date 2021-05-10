@@ -30,5 +30,5 @@ deploy:
   distributions: "sdist bdist_wheel"
   skip_existing: true
   on:
-    branch: main
+    all_branches: true
     tags: true
