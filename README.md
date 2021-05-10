@@ -1,6 +1,11 @@
 # pram
 Python implementation of post-randomisation method for disclosure control
 
+[![Build Status](https://travis-ci.com/scottbw/pram.svg?branch=main)](https://travis-ci.com/scottbw/pram)
+[![License](https://img.shields.io/pypi/l/pram.svg?branch=main)](https://github.com/scottbw/pram/blob/main/LICENSE)
+[![Status](https://img.shields.io/pypi/status/pram.svg?branch=main)](https://pypi.org/project/pram/)
+[![Supported versions](https://img.shields.io/pypi/pyversions/pram.svg?branch=main)](https://pypi.org/project/pram/)
+
 ## Usage
 
 Call the pram() method with a Pandas dataframe to apply post-randomisation perturbation
