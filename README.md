@@ -28,6 +28,7 @@ versions of the dataset.
 ## Example
 
 ~~~
+from pram import pram
 persons = [
 {'gender': 'female', 'region': 'rural', 'education': 'higher', 'age': 27},
 {'gender': 'female', 'region': 'rural', 'education': 'lower', 'age': 35},
@@ -55,5 +56,5 @@ persons = [
 {'gender': 'female', 'region': 'urban', 'education': 'lower', 'age': 27}
 ]
 df = pd.DataFrame(persons)
-print(Pram.pram(df))
+print(pram(df))
 ~~~
