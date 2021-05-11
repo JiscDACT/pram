@@ -1,34 +1,41 @@
-language: python
-
-cache: pip
-
-python:
-  - 3.6
-
-matrix:
+jobs:
   include:
-  - python: 3.7
-    dist: xenial
+      - os: windows
+        language: shell
+        before_install:
+          - choco install python --version=3.7
+          - python -m pip install --upgrade pip
+        env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+        install:
+          - pip install -r requirements.txt
+          - pip install pyinstaller
+        before_deploy:
+          - pyinstaller -F pram.py
+        deploy:
+          provider: releases
+          api_key:
+            secure: "hTxYRr9rnPHQni7ycZenCRulo3Dc1nn+Z9xoE0uyafuSGswYcUpUI7+zeNTqX0jGBNoSYtWCJ/8etGf/zy2QlA8e3rvrjJB+H7aEu+nH+8kpQAQjjRk01eBiD9o9BFvIaiI4HgTEDmQHQhDEABnxSljO1A4E5GHy2RHBII7GbVM8/a41p2NMN1PMBiOeoNc47D5jKLeEdV3Tjho2Rzq+DYVr7tRxYn36aSiKw4U6DNba18I74Bbzq6tvQ6TQag31z+ULSyMcsoZIUWr4QFvzaSZLHycu2nAuKAU+QJLRyDxkWaG+36NXXbTSMpjIxzPm+zobcbkGGlelJx2LRI11JSITK1/mqiXb6bjwQD54BJZT0wR0G0JzQJq2iEpNmykrJoGrkxZsOKFkrJ9wnVzqAzJo55XRkSc9s2/bToXViEDAFNMbxX36Xiy77alj2zKeJs7arztlPkmnGR2zkODcyfOsW+v10V5aQ2BgkqIqqYKUpKBlaDJeA1FppXAk0IVRwmtuO02kcGq0NJ4NDCQ4yRVkm3Faz0DO3w+eQ6hhRbKE7vdr2d+chVdOfhEdD1vMQhgJ2fQ6GoV9fHAMZKHKixvaonsI02rXbani3l68QMXQlVonRxUAqMJjpc7Xaj3IhVtRy4kywbKfAbbBjetJHxtpM5d4dZK5gP2Bz2bk1TA="
+          file_glob: true
+          file: dist/pram.exe
+          skip_cleanup: true
+          draft: true
+          on:
+            all_branches: true
+            tags: true
+      - language: python
+        python: 3.7
+        install:
+          - pip install pipenv
+          - pipenv install --dev --skip-lock
+        script:
+          pipenv run pytest -v
+        deploy:
+          provider: pypi
+          user: $TEST_PYPI_USER
+          password: $TEST_PYPI_PASS
+          distributions: "sdist bdist_wheel"
+          skip_existing: true
+          on:
+            all_branches: true
+            tags: true
 
-branches:
-  except:
-    - /^[0-9]+\.[0-9]+\.[0-9]+/
-
-install:
-  - pip install pipenv
-  - pipenv install --dev --skip-lock
-
-script:
-  pipenv run pytest -v
-
-after_success:
-
-deploy:
-  provider: pypi
-  user: $TEST_PYPI_USER
-  password: $TEST_PYPI_PASS
-  distributions: "sdist bdist_wheel"
-  skip_existing: true
-  on:
-    all_branches: true
-    tags: true
