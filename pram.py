@@ -3,10 +3,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import os
-from collections import Counter
 import logging
-
-logger = logging.getLogger('pram')
 
 
 class Pram:
@@ -18,27 +15,25 @@ class Pram:
         :param values:
         :return:
         """
-        # Create a raw transition matrix
-
-        # Generate the product of the values
-        left, right = pd.core.reshape.util.cartesian_product([values, values])
-        pairs = pd.DataFrame(dict(Source=left, Target=right)).values
-
         # Create a transition matrix using the counts of A:B
-        matrix = pd.Series(Counter(map(tuple, pairs))).unstack().fillna(0)
+        counts = pd.Series(values).value_counts(sort=False)
+        v = counts.values
+        matrix_values = v * v[:, None]
+        matrix = pd.DataFrame(matrix_values)
+        matrix.columns = counts.index
+        matrix.index = counts.index
 
         # Normalize the columns to sum to 1
         matrix = matrix.divide(matrix.sum(axis=0), axis=1)
-
         return matrix
 
     @staticmethod
     def __get_weighted_transition_matrix__(values, m, alpha):
         """
         Create a transition matrix weighted by alpha
-        :param values:
-        :param alpha:
-        :param m:
+        :param values: the set of values to create a transition matrix for
+        :param alpha: alpha - degree of change
+        :param m: minimum diagonal
         :return:
         """
         tm = Pram.__get_transition_matrix__(values)
@@ -87,6 +82,7 @@ class Pram:
         :param columns: a list of the names of the columns to apply PRAM to. Defaults to None, applying to all columns.
         :return:
         """
+        logger = logging.getLogger('pram')
 
         # Convert everything in the dataframe into a string - we can only
         # work with factors/tokens using PRAM
@@ -96,12 +92,13 @@ class Pram:
             columns = data.columns
 
         if strata and strata in columns:
+
             logger.warning("Columns used for stratification cannot also be modified; " + strata +
                             " will be removed from the set of columns")
             columns = columns[columns != strata]
 
         # Create the weighted transition matrix for each column
-        tm = {}
+        transition_matrices = {}
 
         if strata is not None:
             strata_levels = list(set(data[strata].values))
@@ -115,7 +112,7 @@ class Pram:
                     values = data[column].values
                 else:
                     values = data[data[strata] == level][column].values
-                tm[level, column] = Pram.__get_weighted_transition_matrix__(values, m, alpha)
+                transition_matrices[level, column] = Pram.__get_weighted_transition_matrix__(values, m, alpha)
 
         logger.debug("Completed building transition matrices - processing data")
 
@@ -126,7 +123,7 @@ class Pram:
                     strata_value = row[strata]
                 else:
                     strata_value = 'all'
-                row[column] = Pram.__pram_replace__(tm[strata_value, column], row[column])
+                row[column] = Pram.__pram_replace__(transition_matrices[strata_value, column], row[column])
 
         return data
 
@@ -199,8 +196,12 @@ def main():
     print_frequencies = vars(args)['f']
     debug = vars(args)['debug']
 
+    logger = logging.getLogger('pram')
+    logging.basicConfig()
+
     if debug:
         logger.setLevel(logging.DEBUG)
+        logger.debug("Debugging enabled")
 
     if len(columns) == 0:
         columns = None
@@ -209,15 +210,17 @@ def main():
         columns = [columns]
 
     if not os.path.exists(input_path):
-        logging.error('Input data file does not exist')
+        logger.error('Input data file does not exist')
         exit()
     else:
-        logging.info("Input data file: " + input_path)
+        logger.info("Input data file: " + input_path)
 
-    logging.info("Output file: " + output_path)
+    logger.info("Output file: " + output_path)
 
     # Load the dataset
+    logger.debug("Loading dataset")
     input_data = pd.read_csv(input_path)
+    logger.debug("Dataset loaded")
 
     # Apply the perturbation
     output_data = pram(input_data, m=param_minimum, alpha=param_alpha, columns=columns, strata=strata)

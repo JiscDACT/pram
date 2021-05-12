@@ -11,8 +11,11 @@ def test_get_transition_matrix_equal():
 
 def test_get_transition_matrix_majority():
     data = ['Male', 'Male', 'Male', 'Female']
-    matrix = Pram.__get_transition_matrix__(data)
-    assert(((matrix.values[0] == 0.25) & (matrix.values[1] == 0.75)).all())
+    m = Pram.__get_transition_matrix__(data)
+    assert(m._get_value('Male', 'Male') == 0.75)
+    assert(m._get_value('Female', 'Female') == 0.25)
+    assert (m._get_value('Male', 'Female') == 0.75)
+    assert (m._get_value('Female', 'Male') == 0.25)
 
 
 def test_get_transition_matrix_same():
@@ -35,7 +38,7 @@ def test_get_weighted_transition_matrix_majority():
     data = ['Male', 'Female', 'Male', 'Male']
     matrix = Pram.__get_weighted_transition_matrix__(data, 0.8, 0.5)
     assert_matrix_is_valid(matrix)
-    assert(matrix.values[0, 0] < matrix.values[1, 1])
+    assert(matrix._get_value('Female', 'Male') < matrix._get_value('Male', 'Female'))
     assert(matrix.values[0, 1] < matrix.values[1, 0])
 
 
