@@ -6,6 +6,8 @@ import os
 from collections import Counter
 import logging
 
+logger = logging.getLogger('pram')
+
 
 class Pram:
 
@@ -94,7 +96,7 @@ class Pram:
             columns = data.columns
 
         if strata and strata in columns:
-            logging.warning("Columns used for stratification cannot also be modified; " + strata +
+            logger.warning("Columns used for stratification cannot also be modified; " + strata +
                             " will be removed from the set of columns")
             columns = columns[columns != strata]
 
@@ -114,6 +116,8 @@ class Pram:
                 else:
                     values = data[data[strata] == level][column].values
                 tm[level, column] = Pram.__get_weighted_transition_matrix__(values, m, alpha)
+
+        logger.debug("Completed building transition matrices - processing data")
 
         # For each row apply PRAM
         for index, row in data.iterrows():
@@ -176,21 +180,30 @@ def main():
                            help='The alpha value')
     argparser.add_argument('strata', metavar='<strata>', type=str, nargs='?', default=None,
                            help='The column to stratify by')
-    argparser.add_argument('columns', metavar='<columns>', type=str, nargs='?', default=None,
-                           help='The column to stratify by')
+    argparser.add_argument('columns', metavar='<columns>', type=str, nargs='*', default=None, action='append',
+                           help='The columns to include')
     argparser.add_argument('-f', action='store_true',
                            help='Print a frequency table showing original vs changed frequencies.')
+    argparser.add_argument('-debug', action='store_true',
+                           help='Enable debugging mode.')
 
     args = argparser.parse_args()
 
     # Defaults
     input_path = vars(args)['input_path'][0]
     output_path = vars(args)['output_path']
-    columns = vars(args)['columns']
+    columns = vars(args)['columns'][0]
     strata = vars(args)['strata']
     param_minimum = vars(args)['m']
     param_alpha = vars(args)['a']
     print_frequencies = vars(args)['f']
+    debug = vars(args)['debug']
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
+
+    if len(columns) == 0:
+        columns = None
 
     if isinstance(columns, str):
         columns = [columns]
