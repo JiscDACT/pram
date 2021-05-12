@@ -118,7 +118,7 @@ class Pram:
         # For each row apply PRAM
         for index, row in data.iterrows():
             for column in columns:
-                if strata != column:
+                if strata is not None and strata != column:
                     strata_value = row[strata]
                 else:
                     strata_value = 'all'

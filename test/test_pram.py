@@ -109,7 +109,7 @@ def test_replace_majority_weighted():
     assert(new_values == ['Female', 'Female', 'Female', 'Male', 'Male', 'Female', 'Female', 'Male', 'Male', 'Male'])
 
 
-def test_stratification():
+def test_pram():
     np.random.seed(1000)
     data = [
         {'gender': 'male', 'education': 'low'},
@@ -124,22 +124,38 @@ def test_stratification():
         {'gender': 'female', 'education': 'high'}
     ]
     df = pd.DataFrame(data)
-
-    out = pram(df, m=0.0, alpha=1.0, strata='gender')
-
+    out = pram(df, m=0.0, alpha=1.0)
     male = out[(df.gender == 'male')].values.__len__()
     female = out[(df.gender == 'female')].values.__len__()
     high_education_male = out[(df.gender == 'male') & (df.education == 'high')].values.__len__()
     high_education_female = out[(df.gender == 'female') & (df.education == 'high')].values.__len__()
-
-    # Education changes in line with the proportions stratified by gender - so the
-    # end proportions are the same but the actual rows are not.
-    assert(not out.equals(df))
     assert(high_education_male == 1)
     assert(high_education_female == 4)
-    # None of the genders should change
     assert(male == 5)
     assert(female == 5)
+
+def test_stratification():
+    data = [
+        {'gender': 'male', 'education': 'low'},
+        {'gender': 'male', 'education': 'low'},
+        {'gender': 'male', 'education': 'low'},
+        {'gender': 'male', 'education': 'low'},
+        {'gender': 'male', 'education': 'high'},
+        {'gender': 'female', 'education': 'low'},
+        {'gender': 'female', 'education': 'high'},
+        {'gender': 'female', 'education': 'high'},
+        {'gender': 'female', 'education': 'high'},
+        {'gender': 'female', 'education': 'high'}
+    ]
+    df = pd.DataFrame(data)
+
+    for i in range(0, 10):
+        out = pram(df, strata='gender')
+        male = out[(df.gender == 'male')].values.__len__()
+        female = out[(df.gender == 'female')].values.__len__()
+        # None of the genders should change
+        assert(male == 5)
+        assert(female == 5)
 
 
 def assert_matrix_is_valid(matrix):
