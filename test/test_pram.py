@@ -39,25 +39,22 @@ def test_get_weighted_transition_matrix_majority():
     matrix = Pram.__get_weighted_transition_matrix__(data, 0.8, 0.5)
     assert_matrix_is_valid(matrix)
     assert(matrix._get_value('Female', 'Male') < matrix._get_value('Male', 'Female'))
-    assert(matrix.values[0, 1] < matrix.values[1, 0])
 
 
 def test_get_weighted_transition_matrix_majority_opposite():
     data = ['Male', 'Female', 'Female', 'Female']
     matrix = Pram.__get_weighted_transition_matrix__(data, 0.8, 0.5)
     assert_matrix_is_valid(matrix)
-    assert(matrix.values[0, 0] > matrix.values[1, 1])
-    assert(matrix.values[0, 1] > matrix.values[1, 0])
+    assert(matrix._get_value('Male', 'Female') < matrix._get_value('Female', 'Male'))
 
 
 def test_get_weighted_transition_matrix_majority_no_mods():
     data = ['Male', 'Male', 'Male', 'Female']
     matrix = Pram.__get_weighted_transition_matrix__(data, 0.0, 1.0)
     assert_matrix_is_valid(matrix)
-    assert(matrix.values[0, 0] < matrix.values[1, 1])
-    assert(matrix.values[0, 1] < matrix.values[1, 0])
-    assert (matrix.values[0, 0] == 0.25)
-    assert (matrix.values[1, 1] == 0.75)
+    assert(matrix._get_value('Female', 'Male') < matrix._get_value('Male', 'Female'))
+    assert (matrix._get_value('Female', 'Male') == 0.25)
+    assert (matrix._get_value('Male', 'Female') == 0.75)
 
 
 def test_get_weighted_transition_matrix_majority_identity():
@@ -74,10 +71,9 @@ def test_get_weighted_transition_matrix_majority_50_alpha():
     data = ['Male', 'Male', 'Male', 'Female']
     matrix = Pram.__get_weighted_transition_matrix__(data, 0.0, 0.5)
     assert_matrix_is_valid(matrix)
-    assert(matrix.values[0, 0] < matrix.values[1, 1])
-    assert(matrix.values[0, 1] < matrix.values[1, 0])
-    assert (matrix.values[0, 0] == 0.625)
-    assert (matrix.values[1, 1] == 0.875)
+    assert(matrix._get_value('Female', 'Male') < matrix._get_value('Male', 'Female'))
+    assert (matrix._get_value('Female', 'Female') == 0.625)
+    assert (matrix._get_value('Male', 'Male') == 0.875)
 
 
 def test_replace_identity():
@@ -88,28 +84,6 @@ def test_replace_identity():
     for value in values:
         new_values.append(Pram.__pram_replace__(matrix, value))
     assert(new_values == values)
-
-
-def test_replace_majority_unweighted():
-    np.random.seed(1234)
-    data = ['Male', 'Male', 'Male', 'Female']
-    matrix = Pram.__get_weighted_transition_matrix__(data, 0.0, 1.0)
-    values = ['Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female']
-    new_values = []
-    for value in values:
-        new_values.append(Pram.__pram_replace__(matrix, value))
-    assert(new_values == ['Female', 'Male', 'Male', 'Male', 'Male', 'Male', 'Male', 'Male', 'Male', 'Male'])
-
-
-def test_replace_majority_weighted():
-    np.random.seed(1234)
-    data = ['Male', 'Male', 'Male', 'Female']
-    matrix = Pram.__get_weighted_transition_matrix__(data, 0.8, 0.5)
-    values = ['Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female']
-    new_values = []
-    for value in values:
-        new_values.append(Pram.__pram_replace__(matrix, value))
-    assert(new_values == ['Female', 'Female', 'Female', 'Male', 'Male', 'Female', 'Female', 'Male', 'Male', 'Male'])
 
 
 def test_pram():
